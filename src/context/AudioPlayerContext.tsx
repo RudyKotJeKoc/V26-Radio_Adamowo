@@ -96,6 +96,15 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
 
   const currentTrack = currentTrackIndex !== null ? (isShuffle ? shuffledPlaylist[currentTrackIndex] : playlist[currentTrackIndex]) : null;
 
+  // Function definitions (needed before useEffect)
+  const playNext = () => {
+    const pl = isShuffle ? shuffledPlaylist : playlist;
+    if (pl.length === 0) return;
+    const newIndex = currentTrackIndex !== null ? (currentTrackIndex + 1) % pl.length : 0;
+    setCurrentTrackIndex(newIndex);
+    setIsPlaying(true);
+  };
+
   // Audio effects
   useEffect(() => {
     const audio = audioRef.current;
@@ -160,14 +169,6 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
 
   const pause = () => {
     setIsPlaying(false);
-  };
-
-  const playNext = () => {
-    const pl = isShuffle ? shuffledPlaylist : playlist;
-    if (pl.length === 0) return;
-    const newIndex = currentTrackIndex !== null ? (currentTrackIndex + 1) % pl.length : 0;
-    setCurrentTrackIndex(newIndex);
-    setIsPlaying(true);
   };
 
   const playPrevious = () => {
