@@ -19,6 +19,7 @@ interface AudioPlayerContextType {
   currentTime: number;
   duration: number;
   volume: number;
+  playbackRate: number;
   play: (track?: Track, playlist?: Track[]) => void;
   pause: () => void;
   playNext: () => void;
@@ -29,6 +30,7 @@ interface AudioPlayerContextType {
   toggleLoop: () => void;
   seek: (time: number) => void;
   setVolume: (volume: number) => void;
+  setPlaybackRate: (rate: number) => void;
 }
 
 // 2. Context
@@ -52,9 +54,21 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     const savedVolume = localStorage.getItem('audioPlayerVolume');
     return savedVolume !== null ? Number(savedVolume) : 1;
   });
+  const [playbackRate, setPlaybackRate] = useState<number>(() => {
+    const savedRate = localStorage.getItem('audioPlayerPlaybackRate');
+    return savedRate !== null ? Number(savedRate) : 1;
+  });
   const [isReady, setIsReady] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Persist playbackRate and apply to audio element
+  useEffect(() => {
+    localStorage.setItem('audioPlayerPlaybackRate', String(playbackRate));
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackRate;
+    }
+  }, [playbackRate]);
 
   // Set initial volume
   useEffect(() => {
@@ -119,10 +133,41 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
   const currentTrack = currentTrackIndex !== null ? (isShuffle ? shuffledPlaylist[currentTrackIndex] : playlist[currentTrackIndex]) : null;
 
   // Function definitions (needed before useEffect)
+  const play = (track?: Track, newPlaylist?: Track[]) => {
+    const targetPlaylist = newPlaylist || playlist;
+    if (newPlaylist) {
+      setPlaylist(newPlaylist);
+    }
+
+    let trackIndex = -1;
+    if (track) {
+      trackIndex = targetPlaylist.findIndex(t => t.file === track.file);
+    } else if (targetPlaylist.length > 0) {
+      trackIndex = currentTrackIndex !== null ? currentTrackIndex : 0;
+    }
+
+    if (trackIndex !== -1) {
+      setCurrentTrackIndex(trackIndex);
+      setIsPlaying(true);
+    }
+  };
+
+  const pause = () => {
+    setIsPlaying(false);
+  };
+
   const playNext = () => {
     const pl = isShuffle ? shuffledPlaylist : playlist;
     if (pl.length === 0) return;
     const newIndex = currentTrackIndex !== null ? (currentTrackIndex + 1) % pl.length : 0;
+    setCurrentTrackIndex(newIndex);
+    setIsPlaying(true);
+  };
+
+  const playPrevious = () => {
+    const pl = isShuffle ? shuffledPlaylist : playlist;
+    if (pl.length === 0) return;
+    const newIndex = currentTrackIndex !== null ? (currentTrackIndex - 1 + pl.length) % pl.length : 0;
     setCurrentTrackIndex(newIndex);
     setIsPlaying(true);
   };
@@ -169,37 +214,22 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     }
   }, [currentTrack, isPlaying]);
 
+  // Media Session API
+  useEffect(() => {
+    if ('mediaSession' in navigator && currentTrack) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentTrack.title || 'Unknown Title',
+        artist: currentTrack.artist || 'Unknown Artist',
+        album: 'Radio Adamowo',
+        artwork: [{ src: currentTrack.cover || '/favicon.svg', sizes: '512x512', type: 'image/svg+xml' }]
+      });
 
-  const play = (track?: Track, newPlaylist?: Track[]) => {
-    const targetPlaylist = newPlaylist || playlist;
-    if (newPlaylist) {
-      setPlaylist(newPlaylist);
+      navigator.mediaSession.setActionHandler('play', () => play());
+      navigator.mediaSession.setActionHandler('pause', () => pause());
+      navigator.mediaSession.setActionHandler('previoustrack', () => playPrevious());
+      navigator.mediaSession.setActionHandler('nexttrack', () => playNext());
     }
-
-    let trackIndex = -1;
-    if (track) {
-      trackIndex = targetPlaylist.findIndex(t => t.file === track.file);
-    } else if (targetPlaylist.length > 0) {
-      trackIndex = currentTrackIndex !== null ? currentTrackIndex : 0;
-    }
-
-    if (trackIndex !== -1) {
-      setCurrentTrackIndex(trackIndex);
-      setIsPlaying(true);
-    }
-  };
-
-  const pause = () => {
-    setIsPlaying(false);
-  };
-
-  const playPrevious = () => {
-    const pl = isShuffle ? shuffledPlaylist : playlist;
-    if (pl.length === 0) return;
-    const newIndex = currentTrackIndex !== null ? (currentTrackIndex - 1 + pl.length) % pl.length : 0;
-    setCurrentTrackIndex(newIndex);
-    setIsPlaying(true);
-  };
+  }, [currentTrack, play, pause, playNext, playPrevious]);
 
   const addToQueue = (track: Track) => {
     setPlaylist(prev => [...prev, track]);
@@ -234,6 +264,7 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     currentTime,
     duration,
     volume,
+    playbackRate,
     play,
     pause,
     playNext,
@@ -244,6 +275,7 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     toggleLoop,
     seek,
     setVolume,
+    setPlaybackRate,
   };
 
   return (

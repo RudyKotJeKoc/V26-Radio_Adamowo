@@ -18,6 +18,8 @@ const GlobalAudioBar = () => {
     seek,
     volume,
     setVolume,
+    playbackRate,
+    setPlaybackRate,
   } = useAudioPlayer();
 
   const formatTime = (timeInSeconds: number) => {
@@ -30,6 +32,13 @@ const GlobalAudioBar = () => {
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
       seek(Number(e.target.value));
   }
+
+  const playbackRates = [0.75, 1, 1.5, 2];
+  const handlePlaybackRateChange = () => {
+    const currentIndex = playbackRates.indexOf(playbackRate);
+    const nextIndex = (currentIndex + 1) % playbackRates.length;
+    setPlaybackRate(playbackRates[nextIndex]);
+  };
 
   if (!currentTrack) {
     return (
@@ -49,21 +58,30 @@ const GlobalAudioBar = () => {
       </div>
 
       <div className="flex flex-col items-center justify-center w-1/2">
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-4">
           <button onClick={toggleShuffle} className={`font-mono text-xs ${isShuffle ? 'text-green-500' : 'text-gray-400 hover:text-white'}`}>
             SHUFFLE
           </button>
           <button onClick={playPrevious} className="text-gray-400 hover:text-white font-bold text-2xl">
             {"◄◄"}
           </button>
+          <button onClick={() => seek(currentTime - 15)} className="text-gray-400 hover:text-white font-bold text-lg">
+            -15s
+          </button>
           <button onClick={isPlaying ? pause : () => play()} className="bg-white text-black rounded-full w-12 h-12 flex items-center justify-center text-2xl hover:scale-105 transition-transform">
             {isPlaying ? '❚❚' : '►'}
+          </button>
+          <button onClick={() => seek(currentTime + 15)} className="text-gray-400 hover:text-white font-bold text-lg">
+            +15s
           </button>
           <button onClick={playNext} className="text-gray-400 hover:text-white font-bold text-2xl">
             {"►►"}
           </button>
           <button onClick={toggleLoop} className={`font-mono text-xs ${isLoop ? 'text-green-500' : 'text-gray-400 hover:text-white'}`}>
             LOOP
+          </button>
+          <button onClick={handlePlaybackRateChange} className="font-mono text-xs w-16 text-center text-green-500">
+            {playbackRate.toFixed(2)}x
           </button>
         </div>
         <div className="w-full flex items-center space-x-2 mt-2">
