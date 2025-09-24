@@ -41,8 +41,8 @@ const KeyFacts = () => {
   }
 
   return (
-    <div className="bg-gray-800 border border-green-500 rounded-lg p-6 my-8 text-center shadow-lg">
-      <h2 className="text-2xl font-bold mb-4 font-special-elite">Key Fact</h2>
+    <div className="bg-gray-800 border border-green-500 rounded-xl p-4 md:p-5 my-8 md:my-12 text-center shadow-lg">
+      <h2 className="text-3xl font-bold mb-4 font-special-elite">Key Fact</h2>
       <p className="text-lg leading-relaxed min-h-[100px] flex items-center justify-center">
         {facts[currentIndex]}
       </p>

@@ -9,7 +9,7 @@ const MainSidebar = () => {
 
   return (
     <aside className="w-64 bg-gray-900 text-white p-6 fixed top-0 left-0 h-full border-r border-gray-700">
-      <a href="/#/" className="text-2xl font-bold mb-6 font-special-elite block">Radio Adamowo</a>
+      <a href="/#/" className="text-3xl font-bold mb-8 font-special-elite block">Radio Adamowo</a>
       <nav>
         <h3 className="text-lg font-semibold mb-3 text-gray-400">Navigation</h3>
         <ul>

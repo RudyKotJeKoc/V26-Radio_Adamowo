@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import MainSidebar from './MainSidebar'; // Updated import
+import MainSidebar from './MainSidebar';
 import GlobalAudioBar from './GlobalAudioBar';
 import { Track, useAudioPlayer } from '../context/AudioPlayerContext';
 import Podcasts from '../pages/Podcasts';
@@ -14,26 +14,19 @@ const Layout = () => {
     fetch('/audio/playlist.json')
       .then(res => res.json())
       .then((data: Track[]) => {
-        const tracksWithTitles = data.map(track => ({
-            ...track,
-            title: track.file.split('/').pop()?.replace('.mp3', '').replace(/_/g, ' ') || 'Unknown Title'
-        }));
-        setAllTracks(tracksWithTitles);
-        // Set the full playlist in the audio player
-        setPlaylist(tracksWithTitles);
+        // The data is now in the correct format, no need to generate titles
+        setAllTracks(data);
+        setPlaylist(data);
       })
       .catch(error => console.error('Failed to load playlist:', error));
   }, [setPlaylist]);
 
   return (
     <div className="flex h-screen bg-gray-900 text-white">
-      {/* Use the new MainSidebar */}
       <MainSidebar />
 
-      {/* The main content area no longer needs filtering logic */}
       <main className="flex-1 ml-64 mb-24 p-8 overflow-y-auto">
         <KeyFacts />
-        {/* Pass all tracks to the Podcasts component */}
         <Podcasts tracks={allTracks} />
       </main>
 

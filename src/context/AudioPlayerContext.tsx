@@ -2,12 +2,13 @@ import React, { createContext, useContext, useState, useEffect, useRef, ReactNod
 
 // 1. Types
 export interface Track {
+  id: string;
   file: string;
   category: string;
-  title?: string;
+  title: string;
   artist?: string;
   cover?: string;
-  articleId?: string; // Add optional articleId
+  articleId?: string;
 }
 
 interface AudioPlayerContextType {
@@ -16,6 +17,7 @@ interface AudioPlayerContextType {
   isPlaying: boolean;
   isShuffle: boolean;
   isLoop: boolean;
+  isMuted: boolean;
   currentTime: number;
   duration: number;
   play: (track?: Track, playlist?: Track[]) => void;
@@ -26,7 +28,10 @@ interface AudioPlayerContextType {
   setPlaylist: (tracks: Track[]) => void;
   toggleShuffle: () => void;
   toggleLoop: () => void;
+  toggleMute: () => void;
   seek: (time: number) => void;
+  volume: number;
+  setVolume: (volume: number) => void;
 }
 
 // 2. Context
@@ -44,6 +49,8 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
   const [isLoop, setIsLoop] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isReady, setIsReady] = useState(false);
@@ -55,11 +62,12 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     try {
       const savedState = localStorage.getItem('audioPlayerState');
       if (savedState) {
-        const { playlist, currentTrackIndex, isShuffle, isLoop } = JSON.parse(savedState);
+        const { playlist, currentTrackIndex, isShuffle, isLoop, volume } = JSON.parse(savedState);
         if (playlist) setPlaylist(playlist);
         if (currentTrackIndex !== null) setCurrentTrackIndex(currentTrackIndex);
         if (isShuffle) setIsShuffle(isShuffle);
         if (isLoop) setIsLoop(isLoop);
+        if (volume !== undefined) setVolume(volume);
       }
     } catch (error) {
       console.error("Failed to load state from localStorage", error);
@@ -76,12 +84,13 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
         currentTrackIndex,
         isShuffle,
         isLoop,
+        volume,
       };
       localStorage.setItem('audioPlayerState', JSON.stringify(stateToSave));
     } catch (error) {
       console.error("Failed to save state to localStorage", error);
     }
-  }, [playlist, currentTrackIndex, isShuffle, isLoop, isReady]);
+  }, [playlist, currentTrackIndex, isShuffle, isLoop, volume, isReady]);
 
   // Create shuffled playlist when shuffle is toggled
   useEffect(() => {
@@ -95,15 +104,6 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
 
 
   const currentTrack = currentTrackIndex !== null ? (isShuffle ? shuffledPlaylist[currentTrackIndex] : playlist[currentTrackIndex]) : null;
-
-  // Function definitions (needed before useEffect)
-  const playNext = () => {
-    const pl = isShuffle ? shuffledPlaylist : playlist;
-    if (pl.length === 0) return;
-    const newIndex = currentTrackIndex !== null ? (currentTrackIndex + 1) % pl.length : 0;
-    setCurrentTrackIndex(newIndex);
-    setIsPlaying(true);
-  };
 
   // Audio effects
   useEffect(() => {
@@ -134,7 +134,6 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
 
   useEffect(() => {
     if (audioRef.current && currentTrack) {
-        // Vite needs base path for assets in public folder
         const audioSrc = `/${currentTrack.file}`;
         if (audioRef.current.src !== window.location.origin + audioSrc) {
             audioRef.current.src = audioSrc;
@@ -144,8 +143,10 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
         } else {
             audioRef.current.pause();
         }
+        audioRef.current.muted = isMuted;
+        audioRef.current.volume = volume;
     }
-  }, [currentTrack, isPlaying]);
+  }, [currentTrack, isPlaying, isMuted, volume]);
 
 
   const play = (track?: Track, newPlaylist?: Track[]) => {
@@ -169,6 +170,14 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
 
   const pause = () => {
     setIsPlaying(false);
+  };
+
+  const playNext = () => {
+    const pl = isShuffle ? shuffledPlaylist : playlist;
+    if (pl.length === 0) return;
+    const newIndex = currentTrackIndex !== null ? (currentTrackIndex + 1) % pl.length : 0;
+    setCurrentTrackIndex(newIndex);
+    setIsPlaying(true);
   };
 
   const playPrevious = () => {
@@ -197,11 +206,19 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     setIsLoop(prev => !prev);
   };
 
+  const toggleMute = () => {
+    setIsMuted(prev => !prev);
+  };
+
   const seek = (time: number) => {
     if (audioRef.current) {
       audioRef.current.currentTime = time;
     }
   };
+
+  const handleSetVolume = (newVolume: number) => {
+    setVolume(Math.max(0, Math.min(1, newVolume)));
+  }
 
   const value: AudioPlayerContextType = {
     playlist,
@@ -209,6 +226,8 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     isPlaying,
     isShuffle,
     isLoop,
+    isMuted,
+    volume,
     currentTime,
     duration,
     play,
@@ -219,7 +238,9 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     setPlaylist: handleSetPlaylist,
     toggleShuffle,
     toggleLoop,
+    toggleMute,
     seek,
+    setVolume: handleSetVolume,
   };
 
   return (
