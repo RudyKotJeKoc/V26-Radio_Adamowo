@@ -18,6 +18,7 @@ interface AudioPlayerContextType {
   isLoop: boolean;
   currentTime: number;
   duration: number;
+  volume: number;
   play: (track?: Track, playlist?: Track[]) => void;
   pause: () => void;
   playNext: () => void;
@@ -27,6 +28,7 @@ interface AudioPlayerContextType {
   toggleShuffle: () => void;
   toggleLoop: () => void;
   seek: (time: number) => void;
+  setVolume: (volume: number) => void;
 }
 
 // 2. Context
@@ -46,9 +48,29 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
   const [isLoop, setIsLoop] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState<number>(() => {
+    const savedVolume = localStorage.getItem('audioPlayerVolume');
+    return savedVolume !== null ? Number(savedVolume) : 1;
+  });
   const [isReady, setIsReady] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Set initial volume
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, []);
+
+  // Persist volume to localStorage
+  useEffect(() => {
+    localStorage.setItem('audioPlayerVolume', String(volume));
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
 
   // Load state from localStorage on initial mount
   useEffect(() => {
@@ -211,6 +233,7 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     isLoop,
     currentTime,
     duration,
+    volume,
     play,
     pause,
     playNext,
@@ -220,6 +243,7 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     toggleShuffle,
     toggleLoop,
     seek,
+    setVolume,
   };
 
   return (
