@@ -33,11 +33,6 @@ const GlobalAudioBar = () => {
       switch (event.code) {
         case 'Space':
           event.preventDefault();
-          if (isPlaying) {
-            pause();
-          } else {
-            play();
-          }
           break;
         case 'ArrowRight':
           seek(currentTime + 5);
