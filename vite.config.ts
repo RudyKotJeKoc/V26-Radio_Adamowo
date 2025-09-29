@@ -2,6 +2,8 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+import { defineConfig } from 'vitest/config';
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -28,5 +30,10 @@ export default defineConfig({
   ],
   server: {
     port: 5173,
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
   },
 });

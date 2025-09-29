@@ -47,34 +47,46 @@ const ArticlePage = ({ articleId }: ArticlePageProps) => {
   }
 
   const { formattedContent, sections } = useMemo(() => {
-      if (!rawContent) return { formattedContent: [], sections: [] };
+    if (!rawContent) return { formattedContent: [], sections: [] };
 
-      const lines = rawContent.split('\n');
-      const sections: Section[] = [];
+    const lines = rawContent.split('\n');
+    const sections: Section[] = [];
+    const idCounts: { [key: string]: number } = {};
 
-      const formattedContent = lines.map((line) => {
-          line = line.trim();
-          if (line.length === 0) return null;
+    const getUniqueId = (baseId: string) => {
+        if (!idCounts[baseId]) {
+            idCounts[baseId] = 1;
+            return baseId;
+        }
+        idCounts[baseId]++;
+        return `${baseId}-${idCounts[baseId]}`;
+    };
 
-          if (/^\d+(\.\d+)*\s/.test(line)) {
-              const id = generateId(line);
-              sections.push({ id, title: line });
-              return <h2 key={id} id={id} className="text-3xl font-bold mt-10 mb-4 font-special-elite scroll-mt-20">{line}</h2>;
-          }
-          if (line === line.toUpperCase() || line.endsWith(':')) {
-              const id = generateId(line);
-              sections.push({ id, title: line });
-              return <h3 key={id} id={id} className="text-2xl font-semibold mt-6 mb-3 scroll-mt-20">{line}</h3>;
-          }
-          if (line.startsWith('*')) {
-              return <li key={generateId(line)} className="ml-6 list-disc text-lg leading-relaxed">{line.substring(1).trim()}</li>;
-          }
-          return <p key={generateId(line)} className="mb-4 text-lg leading-relaxed">{line}</p>;
-      });
+    const formattedContent = lines.map((line, index) => {
+        line = line.trim();
+        if (line.length === 0) return null;
 
-      return { formattedContent, sections };
+        const baseId = generateId(line);
 
-  }, [rawContent]);
+        if (/^\d+(\.\d+)*\s/.test(line)) {
+            const id = getUniqueId(baseId);
+            sections.push({ id, title: line });
+            return <h2 key={`${id}-${index}`} id={id} className="text-3xl font-bold mt-10 mb-4 font-special-elite scroll-mt-20">{line}</h2>;
+        }
+        if (line === line.toUpperCase() || line.endsWith(':')) {
+            const id = getUniqueId(baseId);
+            sections.push({ id, title: line });
+            return <h3 key={`${id}-${index}`} id={id} className="text-2xl font-semibold mt-6 mb-3 scroll-mt-20">{line}</h3>;
+        }
+        if (line.startsWith('*')) {
+            return <li key={`${baseId}-${index}`} className="ml-6 list-disc text-lg leading-relaxed">{line.substring(1).trim()}</li>;
+        }
+        return <p key={`${baseId}-${index}`} className="mb-4 text-lg leading-relaxed">{line}</p>;
+    });
+
+    return { formattedContent, sections };
+
+}, [rawContent]);
 
 
   return (
