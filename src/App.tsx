@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Layout from './components/Layout';
-import ArticlePage from './pages/ArticlePage';
+
 
 const App = () => {
   const [route, setRoute] = useState(window.location.hash);
 
   useEffect(() => {
+
     const handleHashChange = () => {
       setRoute(window.location.hash);
     };

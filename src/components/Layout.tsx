@@ -4,7 +4,6 @@ import GlobalAudioBar from './GlobalAudioBar';
 import { Track, useAudioPlayer } from '../context/AudioPlayerContext';
 import Podcasts from '../pages/Podcasts';
 import KeyFacts from './KeyFacts';
-
 const Layout = () => {
   const [allTracks, setAllTracks] = useState<Track[]>([]);
   const { setPlaylist } = useAudioPlayer();
