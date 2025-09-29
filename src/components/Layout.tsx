@@ -4,6 +4,8 @@ import GlobalAudioBar from './GlobalAudioBar';
 import { Track, useAudioPlayer } from '../context/AudioPlayerContext';
 import Podcasts from '../pages/Podcasts';
 import KeyFacts from './KeyFacts';
+import CrisisHelpline from './crisis/CrisisHelpline';
+import { SafetyFeatures } from '../utils/safety';
 
 const Layout = () => {
   const [allTracks, setAllTracks] = useState<Track[]>([]);
@@ -31,6 +33,9 @@ const Layout = () => {
       </main>
 
       <GlobalAudioBar />
+      
+      {/* Crisis help always available */}
+      <CrisisHelpline />
     </div>
   );
 };

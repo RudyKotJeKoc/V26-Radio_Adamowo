@@ -18,6 +18,39 @@
     "category": "ambient"
   },
   {
+    "id": "support/meditation-breathe.mp3",
+    "title": "Medytacja Oddechowa - Uspokojenie",
+    "file": "support/meditation-breathe.mp3",
+    "category": "healing-journey",
+    "supportCategory": "healing-journey",
+    "description": "Prowadzona medytacja oddechowa pomagająca w uspokojeniu i odprężeniu"
+  },
+  {
+    "id": "support/affirmations-strength.mp3",
+    "title": "Afirmacje Siły - Budowanie Pewności Siebie",
+    "file": "support/affirmations-strength.mp3",
+    "category": "healing-journey",
+    "supportCategory": "healing-journey",
+    "description": "Pozytywne afirmacje wspierające budowanie siły wewnętrznej"
+  },
+  {
+    "id": "support/crisis-guidance.mp3",
+    "title": "Przewodnik Sytuacji Kryzysowej",
+    "file": "support/crisis-guidance.mp3",
+    "category": "crisis-intervention",
+    "supportCategory": "crisis-intervention",
+    "urgent": true,
+    "description": "Instrukcje postępowania w sytuacji bezpośredniego zagrożenia"
+  },
+  {
+    "id": "support/legal-rights-overview.mp3",
+    "title": "Przegląd Praw Ofiar Przemocy",
+    "file": "support/legal-rights-overview.mp3",
+    "category": "education",
+    "supportCategory": "education",
+    "description": "Informacje o prawach i procedurach dla ofiar przemocy domowej"
+  },
+  {
     "id": "audio/Adamskich_Sprawa.mp3",
     "title": "Adamskich Sprawa",
     "file": "audio/Adamskich_Sprawa.mp3",

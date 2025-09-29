@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 
 // 1. Types
 export interface Track {
@@ -9,6 +9,9 @@ export interface Track {
   artist?: string;
   cover?: string;
   articleId?: string;
+  supportCategory?: string;
+  urgent?: boolean;
+  description?: string;
 }
 
 interface AudioPlayerContextType {
@@ -105,7 +108,23 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
 
   const currentTrack = currentTrackIndex !== null ? (isShuffle ? shuffledPlaylist[currentTrackIndex] : playlist[currentTrackIndex]) : null;
 
-  // Audio effects
+  const playNext = useCallback(() => {
+    const pl = isShuffle ? shuffledPlaylist : playlist;
+    if (pl.length === 0) return;
+    const newIndex = currentTrackIndex !== null ? (currentTrackIndex + 1) % pl.length : 0;
+    setCurrentTrackIndex(newIndex);
+    setIsPlaying(true);
+  }, [isShuffle, shuffledPlaylist, playlist, currentTrackIndex]);
+
+  const playPrevious = useCallback(() => {
+    const pl = isShuffle ? shuffledPlaylist : playlist;
+    if (pl.length === 0) return;
+    const newIndex = currentTrackIndex !== null ? (currentTrackIndex - 1 + pl.length) % pl.length : 0;
+    setCurrentTrackIndex(newIndex);
+    setIsPlaying(true);
+  }, [isShuffle, shuffledPlaylist, playlist, currentTrackIndex]);
+
+  // Audio effects - moved after function definitions to prevent initialization error
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -170,22 +189,6 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
 
   const pause = () => {
     setIsPlaying(false);
-  };
-
-  const playNext = () => {
-    const pl = isShuffle ? shuffledPlaylist : playlist;
-    if (pl.length === 0) return;
-    const newIndex = currentTrackIndex !== null ? (currentTrackIndex + 1) % pl.length : 0;
-    setCurrentTrackIndex(newIndex);
-    setIsPlaying(true);
-  };
-
-  const playPrevious = () => {
-    const pl = isShuffle ? shuffledPlaylist : playlist;
-    if (pl.length === 0) return;
-    const newIndex = currentTrackIndex !== null ? (currentTrackIndex - 1 + pl.length) % pl.length : 0;
-    setCurrentTrackIndex(newIndex);
-    setIsPlaying(true);
   };
 
   const addToQueue = (track: Track) => {
